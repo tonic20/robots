@@ -49,7 +49,7 @@ class TestRobots < Test::Unit::TestCase
   end
   
   def test_other_values
-    sitemap = {"Sitemap" => ["http://www.eventbrite.com/sitemap_index.xml", "http://www.eventbrite.com/sitemap_index.xml"]}
+    sitemap = {"sitemap" => ["http://www.eventbrite.com/sitemap_index.xml", "http://www.eventbrite.com/sitemap_index.xml"]}
     assert_other_equals("eventbrite", sitemap)
   end
   

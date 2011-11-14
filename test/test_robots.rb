@@ -20,6 +20,7 @@ class TestRobots < Test::Unit::TestCase
     end
     
     @robots = Robots.new "Ruby-Robot.txt Parser Test Script"
+    @robots_mobot = Robots.new "Mobot"
   end
   
   def test_allowed_if_no_robots
@@ -51,6 +52,11 @@ class TestRobots < Test::Unit::TestCase
   def test_other_values
     sitemap = {"sitemap" => ["http://www.eventbrite.com/sitemap_index.xml", "http://www.eventbrite.com/sitemap_index.xml"]}
     assert_other_equals("eventbrite", sitemap)
+  end
+
+  def test_crawl_delay
+    assert_equal(1, @robots.crawl_delay(uri_for_name("extended", "/")))
+    assert_equal(0.5, @robots_mobot.crawl_delay(uri_for_name("extended", "/")))
   end
   
   def assert_other_equals(name, value)

@@ -9,7 +9,7 @@ class Robots
   
   class ParsedRobots
     
-    def initialize(uri, user_agent)
+    def initialize(uri, user_agent, options = {})
       @last_accessed = Time.at(1)
       
       io = Robots.get_robots_txt(uri, user_agent)
@@ -18,10 +18,13 @@ class Robots
         io = StringIO.new("User-agent: *\nAllow: /\n")
       end
 
+      @options = options
       @other = {}
       @disallows = {}
       @allows = {}
-      @delays = {} # added delays to make it work
+      @delays = {}
+      @clean_param = {}
+
       agent = /.*/
       io.each do |line|
         next if line =~ /^\s*(#.*|$)/
@@ -39,7 +42,7 @@ class Robots
           @disallows[agent] ||= []
           @disallows[agent] << to_regex(value)
         when "crawl-delay"
-          @delays[agent] = value.to_i
+          @delays[agent] = value.to_f rescue 0
         else
           @other[key] ||= []
           @other[key] << value
@@ -76,14 +79,22 @@ class Robots
         end
       end
       
-      if allowed && @delays[user_agent]
-        sleep @delays[user_agent] - (Time.now - @last_accessed)
+      if allowed && !@options[:skip_delay]
+        delay = crawl_delay(uri, user_agent) - (Time.now - @last_accessed)
+        sleep(delay) if delay > 0
         @last_accessed = Time.now
       end
       
       return allowed
     end
     
+    def crawl_delay(uri, user_agent)
+      return 0 unless @parsed
+      delay = 0
+      @delays.each { |key, value| delay = value if user_agent =~ key }
+      delay
+    end
+
     def other_values
       @other
     end
@@ -116,22 +127,33 @@ class Robots
     @timeout || DEFAULT_TIMEOUT
   end
   
-  def initialize(user_agent)
+  def initialize(user_agent, options = {})
     @user_agent = user_agent
+    @options = options
     @parsed = {}
   end
   
   def allowed?(uri)
-    uri = URI.parse(uri.to_s) unless uri.is_a?(URI)
-    host = uri.host
-    @parsed[host] ||= ParsedRobots.new(uri, @user_agent)
+    uri, host = Robots.get_uri_and_host(uri)
+    @parsed[host] ||= ParsedRobots.new(uri, @user_agent, @options)
     @parsed[host].allowed?(uri, @user_agent)
+  end
+
+  def crawl_delay(uri)
+    uri, host = Robots.get_uri_and_host(uri)
+    @parsed[host] ||= ParsedRobots.new(uri, @user_agent, @options)
+    @parsed[host].crawl_delay(uri, @user_agent)
   end
   
   def other_values(uri)
+    uri, host = Robots.get_uri_and_host(uri)
+    @parsed[host] ||= ParsedRobots.new(uri, @user_agent, @options)
+    @parsed[host].other_values
+  end
+
+  def self.get_uri_and_host(uri)
     uri = URI.parse(uri.to_s) unless uri.is_a?(URI)
     host = uri.host
-    @parsed[host] ||= ParsedRobots.new(uri, @user_agent)
-    @parsed[host].other_values
+    [uri, host]
   end
 end

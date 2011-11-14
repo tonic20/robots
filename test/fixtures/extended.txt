@@ -1,9 +1,10 @@
 User-agent: *
-Disallow: /sendto_form
-Disallow: /folder_factories
-Disallow: /search-tag
+Disallow: /forbidden
 Crawl-delay: 1
-Clean-param: searchterm /
+Clean-param: term1 /
+Clean-param: term2 /path1
 
 User-agent: Mobot
 Crawl-delay: 0.5
+Clean-param: term3&term4 /path2
+Clean-param: term5 /

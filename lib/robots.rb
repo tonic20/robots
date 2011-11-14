@@ -23,7 +23,7 @@ class Robots
       @disallows = {}
       @allows = {}
       @delays = {}
-      @clean_param = {}
+      @clean_params = {}
 
       agent = /.*/
       io.each do |line|
@@ -43,6 +43,9 @@ class Robots
           @disallows[agent] << to_regex(value)
         when "crawl-delay"
           @delays[agent] = value.to_f rescue 0
+        when "clean-param"
+          @clean_params[agent] ||= []
+          @clean_params[agent] << parse_clean_param(value)
         else
           @other[key] ||= []
           @other[key] << value
@@ -95,6 +98,24 @@ class Robots
       delay
     end
 
+    def clean_url(uri, user_agent)
+      url = uri.dup
+      return url unless @parsed
+      
+      @clean_params.each do |key, value|
+        if user_agent =~ key
+          value.each do |rule|
+            if url.path =~ rule[:path]
+              rule[:params].each do |param|
+                url.query = url.query.split("&").reject{|p| p =~ /^#{param}=|^#{param}$/}.join("&")
+              end
+            end
+          end
+        end
+      end
+      url.to_s.gsub /\?$/, ""
+    end
+
     def other_values
       @other
     end
@@ -106,6 +127,12 @@ class Robots
       pattern = Regexp.escape(pattern)
       pattern.gsub!(Regexp.escape("*"), ".*")
       Regexp.compile("^#{pattern}")
+    end
+
+    def parse_clean_param(value)
+      params, path = value.split
+      params = params.split("&")
+      { params: params, path: to_regex(path) }
     end
   end
   
@@ -145,11 +172,19 @@ class Robots
     @parsed[host].crawl_delay(uri, @user_agent)
   end
   
+  def clean_url(uri)
+    uri, host = Robots.get_uri_and_host(uri)
+    @parsed[host] ||= ParsedRobots.new(uri, @user_agent, @options)
+    @parsed[host].clean_url(uri, @user_agent)
+  end
+
   def other_values(uri)
     uri, host = Robots.get_uri_and_host(uri)
     @parsed[host] ||= ParsedRobots.new(uri, @user_agent, @options)
     @parsed[host].other_values
   end
+
+  protected
 
   def self.get_uri_and_host(uri)
     uri = URI.parse(uri.to_s) unless uri.is_a?(URI)

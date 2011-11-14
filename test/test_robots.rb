@@ -58,6 +58,25 @@ class TestRobots < Test::Unit::TestCase
     assert_equal(1, @robots.crawl_delay(uri_for_name("extended", "/")))
     assert_equal(0.5, @robots_mobot.crawl_delay(uri_for_name("extended", "/")))
   end
+
+  def test_clean_url
+    h = uri_for_name("extended")
+    assert_equal("#{h}/", @robots.clean_url("#{h}/?term1=test"))
+    assert_equal("#{h}/?tt=qq", @robots.clean_url("#{h}/?term1=test&tt=qq"))
+    assert_equal("#{h}/?tt=qq", @robots.clean_url("#{h}/?tt=qq&term1=test&term1=test2"))
+    assert_equal("#{h}/aaa/zzz", @robots.clean_url("#{h}/aaa/zzz?term1=test"))
+    assert_equal("#{h}/path1/", @robots.clean_url("#{h}/path1/?term2=test"))
+
+    assert_equal("#{h}/", @robots_mobot.clean_url("#{h}/?term1=test"))
+    assert_equal("#{h}/?tt=qq", @robots_mobot.clean_url("#{h}/?term1=test&tt=qq"))
+    assert_equal("#{h}/?tt=qq", @robots_mobot.clean_url("#{h}/?tt=qq&term1=test&term1=test2"))
+    assert_equal("#{h}/aaa/zzz", @robots_mobot.clean_url("#{h}/aaa/zzz?term1=test"))
+    assert_equal("#{h}/path1", @robots_mobot.clean_url("#{h}/path1?term2=test"))
+
+    assert_equal("#{h}/", @robots_mobot.clean_url("#{h}/?term5=test"))
+    assert_equal("#{h}/?term3=test&term4=test", @robots_mobot.clean_url("#{h}/?term3=test&term4=test"))
+    assert_equal("#{h}/path2", @robots_mobot.clean_url("#{h}/path2?term3=test&term4=test"))
+  end
   
   def assert_other_equals(name, value)
     assert_equal(value, @robots.other_values(uri_for_name(name, "/")))
@@ -75,8 +94,7 @@ class TestRobots < Test::Unit::TestCase
     assert_equal(value, @robots.allowed?(uri_for_name(name, path)), @robots.inspect)
   end
   
-  def uri_for_name(name, path)
+  def uri_for_name(name, path=nil)
     uri = name.nil? ? nil : "http://www.#{name}.com#{path}"
-  end
-    
+  end 
 end

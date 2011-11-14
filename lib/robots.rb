@@ -100,7 +100,7 @@ class Robots
 
     def clean_url(uri, user_agent)
       url = uri.dup
-      return url unless @parsed
+      return url unless @parsed && url.query
       
       @clean_params.each do |key, value|
         if user_agent =~ key
@@ -113,7 +113,8 @@ class Robots
           end
         end
       end
-      url.to_s.gsub /\?$/, ""
+      url.query = nil if url.query.empty?
+      url
     end
 
     def other_values

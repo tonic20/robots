@@ -61,23 +61,29 @@ class TestRobots < Test::Unit::TestCase
 
   def test_clean_url
     h = uri_for_name("extended")
-    assert_equal("#{h}/", @robots.clean_url("#{h}/?term1=test"))
-    assert_equal("#{h}/?tt=qq", @robots.clean_url("#{h}/?term1=test&tt=qq"))
-    assert_equal("#{h}/?tt=qq", @robots.clean_url("#{h}/?tt=qq&term1=test&term1=test2"))
-    assert_equal("#{h}/aaa/zzz", @robots.clean_url("#{h}/aaa/zzz?term1=test"))
-    assert_equal("#{h}/path1/", @robots.clean_url("#{h}/path1/?term2=test"))
+    assert_equal("#{h}/", @robots.clean_url("#{h}/").to_s)
+    assert_equal("#{h}/test", @robots.clean_url("#{h}/test").to_s)
 
-    assert_equal("#{h}/", @robots_mobot.clean_url("#{h}/?term1=test"))
-    assert_equal("#{h}/?tt=qq", @robots_mobot.clean_url("#{h}/?term1=test&tt=qq"))
-    assert_equal("#{h}/?tt=qq", @robots_mobot.clean_url("#{h}/?tt=qq&term1=test&term1=test2"))
-    assert_equal("#{h}/aaa/zzz", @robots_mobot.clean_url("#{h}/aaa/zzz?term1=test"))
-    assert_equal("#{h}/path1", @robots_mobot.clean_url("#{h}/path1?term2=test"))
+    assert_equal("#{h}/", @robots.clean_url("#{h}/?term1=test").to_s)
+    assert_equal("#{h}/?tt=qq", @robots.clean_url("#{h}/?term1=test&tt=qq").to_s)
+    assert_equal("#{h}/?tt=qq", @robots.clean_url("#{h}/?tt=qq&term1=test&term1=test2").to_s)
+    assert_equal("#{h}/aaa/zzz", @robots.clean_url("#{h}/aaa/zzz?term1=test").to_s)
+    assert_equal("#{h}/path1/", @robots.clean_url("#{h}/path1/?term2=test").to_s)
 
-    assert_equal("#{h}/", @robots_mobot.clean_url("#{h}/?term5=test"))
-    assert_equal("#{h}/?term3=test&term4=test", @robots_mobot.clean_url("#{h}/?term3=test&term4=test"))
-    assert_equal("#{h}/path2", @robots_mobot.clean_url("#{h}/path2?term3=test&term4=test"))
+    assert_equal("#{h}/", @robots_mobot.clean_url("#{h}/?term1=test").to_s)
+    assert_equal("#{h}/?tt=qq", @robots_mobot.clean_url("#{h}/?term1=test&tt=qq").to_s)
+    assert_equal("#{h}/?tt=qq", @robots_mobot.clean_url("#{h}/?tt=qq&term1=test&term1=test2").to_s)
+    assert_equal("#{h}/aaa/zzz", @robots_mobot.clean_url("#{h}/aaa/zzz?term1=test").to_s)
+    assert_equal("#{h}/path1", @robots_mobot.clean_url("#{h}/path1?term2=test").to_s)
 
-    assert_equal("#{h}/forum_old/showthread.php?t=8243", @robots.clean_url("#{h}/forum_old/showthread.php?s=681498605&t=8243&ref=1311"))
+    assert_equal("#{h}/", @robots_mobot.clean_url("#{h}/?term5=test").to_s)
+    assert_equal("#{h}/?term3=test&term4=test", @robots_mobot.clean_url("#{h}/?term3=test&term4=test").to_s)
+    assert_equal("#{h}/path2", @robots_mobot.clean_url("#{h}/path2?term3=test&term4=test").to_s)
+
+    assert_equal("#{h}/forum_old/showthread.php?t=8243", @robots.clean_url("#{h}/forum_old/showthread.php?s=681498605&t=8243&ref=1311").to_s)
+
+    h = uri_for_name("emptyish")
+    assert_equal("#{h}/qwerty?t=asd", @robots.clean_url("#{h}/qwerty?t=asd").to_s)
   end
   
   def assert_other_equals(name, value)

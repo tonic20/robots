@@ -3,6 +3,7 @@ Disallow: /forbidden
 Crawl-delay: 1
 Clean-param: term1 /
 Clean-param: term2 /path1
+Clean-param: s&ref /forum*/showthread.php
 
 User-agent: Mobot
 Crawl-delay: 0.5

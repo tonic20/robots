@@ -76,6 +76,8 @@ class TestRobots < Test::Unit::TestCase
     assert_equal("#{h}/", @robots_mobot.clean_url("#{h}/?term5=test"))
     assert_equal("#{h}/?term3=test&term4=test", @robots_mobot.clean_url("#{h}/?term3=test&term4=test"))
     assert_equal("#{h}/path2", @robots_mobot.clean_url("#{h}/path2?term3=test&term4=test"))
+
+    assert_equal("#{h}/forum_old/showthread.php?t=8243", @robots.clean_url("#{h}/forum_old/showthread.php?s=681498605&t=8243&ref=1311"))
   end
   
   def assert_other_equals(name, value)

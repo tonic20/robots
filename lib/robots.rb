@@ -83,7 +83,7 @@ class Robots
       end
       
       if allowed && !@options[:skip_delay]
-        delay = crawl_delay(uri, user_agent) - (Time.now - @last_accessed)
+        delay = (crawl_delay(uri, user_agent) || 0) - (Time.now - @last_accessed)
         sleep(delay) if delay > 0
         @last_accessed = Time.now
       end
@@ -92,8 +92,8 @@ class Robots
     end
     
     def crawl_delay(uri, user_agent)
-      return 0 unless @parsed
-      delay = 0
+      return nil unless @parsed
+      delay = nil
       @delays.each { |key, value| delay = value if user_agent =~ key }
       delay
     end

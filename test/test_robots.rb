@@ -55,6 +55,7 @@ class TestRobots < Test::Unit::TestCase
   end
 
   def test_crawl_delay
+    assert_equal(nil, @robots.crawl_delay(uri_for_name("google", "/")))
     assert_equal(1, @robots.crawl_delay(uri_for_name("extended", "/")))
     assert_equal(0.5, @robots_mobot.crawl_delay(uri_for_name("extended", "/")))
   end
